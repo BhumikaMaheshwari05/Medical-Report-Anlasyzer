@@ -1,6 +1,15 @@
-{%extends "loginlayout.html" %}
+{%extends "layout.html" %}
 {% block content%}
-    
+    <head><meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<link rel="stylesheet" type="text/css" href="{{url_for('static',filename='assets/css/style.css')}}">
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+		<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"></head>
+	<br>
+	<body style="background-image: url('{{url_for('static',filename='assets/img/bg1.jpg')}}'); ">
+		
+	</body>
 	<div class="container-fluid" style="padding-left: 35%;">
 		<div class="row">
 			<div class="col-lg-6 col-md-6 form-container">
@@ -11,14 +20,14 @@
 					<div class="heading mb-3">
 						<h4>Login into your account</h4>
 					</div>
-					<form>
+					<form action="/login" method="post">
 						<div class="form-input">
 							<span><i class="fa fa-envelope"></i></span>
-							<input type="email" placeholder="Email Address" required>
+							<input type="username" name="usr" placeholder="Username" required>
 						</div>
 						<div class="form-input">
 							<span><i class="fa fa-lock"></i></span>
-							<input type="password" placeholder="Password" required>
+							<input type="password" name="password" placeholder="Password" required>
 						</div>
 						<div class="row mb-3">
 							<div class="col-6 d-flex">

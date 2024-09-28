@@ -1,4 +1,3 @@
-SIH
 First of all install Python 3.10 in your pc
 
 To see the WEBAPP:

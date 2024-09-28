@@ -9,18 +9,22 @@ app = Flask(__name__)
 app.secret_key = 'super-secret-key'
 
 
-app.config['SQLALCHEMY_DATABASE_URI']="mysql+mysqlconnector://root:@localhost/medrep"
+app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///MedRep.db"
 
 db = SQLAlchemy(app) 
 
 bcrypt=Bcrypt(app)
 
 class Prevreports(db.Model):
-    table_name='prevreports'
-    Sno=db.Column(db.Integer,primary_key=True)
-    Name=db.Column(db.String(80),nullable=False)
-    Report=db.Column(db.String(150),nullable=False)
-    Date=db.Column(db.String(80),nullable=True)
+    __tablename__ = 'prevreports'  # Fix: Table name should be double-underscored.
+    Sno = db.Column(db.Integer, primary_key=True)
+    Email = db.Column(db.String(80), db.ForeignKey('login.Email'))  # Fix: Correct foreign key table name 'login.Email'.
+    Name = db.Column(db.String(80), nullable=False)
+    Report = db.Column(db.String(150), nullable=False)
+    Date = db.Column(db.String(80), nullable=True)
+    
+    # Relationship to Login model
+    login_cred = db.relationship('Login', back_populates='user_reports')
 
 
 class Contact(db.Model):
@@ -36,12 +40,18 @@ class Contact(db.Model):
 
 
 class Login(db.Model):
-    table_name='login'
-    Sno=db.Column(db.Integer,primary_key=True)
-    Username=db.Column(db.String(80),nullable=False)
-    Email=db.Column(db.String(80),nullable=False)
-    Password=db.Column(db.String(150),nullable=False)
+    __tablename__ = 'login'
+    Sno = db.Column(db.Integer)  # Not primary key.
+    Username = db.Column(db.String(80), nullable=False)
+    Email = db.Column(db.String(80), primary_key=True)  # Fix: This should be primary key, as defined.
+    Password = db.Column(db.String(150), nullable=False)
+    
+    # Relationship to Prevreports model
+    user_reports = db.relationship('Prevreports', back_populates='login_cred',lazy=True)
 
+
+with app.app_context():
+    db.create_all()
 
 @app.route("/")
 def home():
@@ -98,7 +108,7 @@ def dash():
         user=Login.query.filter_by(Username=session['user']).first()
         if user:
             data=Prevreports.query.filter_by().all()
-            return render_template("indexdsh.html",data=data)
+            return render_template("dashboard.html",data=data)
     else:
         return redirect('/login')
     #return render_template("indexdsh.html",data=data)
@@ -108,6 +118,15 @@ def logout():
     session.pop('user',None)
     return redirect('/')
 
+@app.route("/dashboard/rpt",methods=["GET","POST"])
+def rept():
+    if request=="POST":
+        name=request.form.get('name')
+        report=request.form.get('reportof')
+        
+    return render_template("reportsub.html")
+
 if __name__ == "__main__":
     app.run(debug=True)
+
 

@@ -19,7 +19,7 @@
                 <u><h3>Welliva</h3></u>
               </div>
               <h2 class="fs-6 fw-normal text-center text-secondary mb-4">Enter your details</h2>
-              <form action="/dashboard/rpt" method="post">
+              <form action="/dashboard/rpt" method="post" enctype="multipart/form-data">
                 <div class="row gy-2 overflow-hidden">
                   <div class="col-12">
                     <div class="form-floating mb-3">
@@ -35,7 +35,7 @@
                   </div>
                   <div class="form-group">
                     <label for="file" style="font-size: large;"><h4>Select report from your device</h3></label>
-                    <input type="file" class="form-control-file" id="exampleFormControlFile1">
+                    <input type="file" class="form-control-file"  name="file" id="exampleFormControlFile1"  accept=".png,.jpg,.jpeg,.pdf,.docx" required>
                   </div>
                   <div>
                     <br>

@@ -1,7 +1,7 @@
 from flask import Flask,render_template,redirect,request,session
 from flask_sqlalchemy import SQLAlchemy
-
-from datetime import datetime
+import os
+from datetime import date
 
 from flask_bcrypt import Bcrypt
 app = Flask(__name__)
@@ -15,16 +15,25 @@ db = SQLAlchemy(app)
 
 bcrypt=Bcrypt(app)
 
+
+app.config['UPLOAD_FOLDER'] = 'uploads'  # Directory to store uploaded files
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max file size: 16MB
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf', 'docx'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 class Prevreports(db.Model):
     __tablename__ = 'prevreports'  # Fix: Table name should be double-underscored.
     Sno = db.Column(db.Integer, primary_key=True)
-    Email = db.Column(db.String(80), db.ForeignKey('login.Email'))  # Fix: Correct foreign key table name 'login.Email'.
-    Name = db.Column(db.String(80), nullable=False)
+    Email = db.Column(db.String(80), db.ForeignKey('login.Email'),nullable=False)  # Fix: Correct foreign key table name 'login.Email'.
+    Name = db.Column(db.String(80), nullable=False) 
     Report = db.Column(db.String(150), nullable=False)
+    File=db.Column(db.String(200),nullable=False)
     Date = db.Column(db.String(80), nullable=True)
     
     # Relationship to Login model
-    login_cred = db.relationship('Login', back_populates='user_reports')
+    
 
 
 class Contact(db.Model):
@@ -41,13 +50,13 @@ class Contact(db.Model):
 
 class Login(db.Model):
     __tablename__ = 'login'
-    Sno = db.Column(db.Integer)  # Not primary key.
-    Username = db.Column(db.String(80), nullable=False)
+      # Not primary key.
+    Username = db.Column(db.String(80), nullable=False,unique=True)
     Email = db.Column(db.String(80), primary_key=True)  # Fix: This should be primary key, as defined.
     Password = db.Column(db.String(150), nullable=False)
     
     # Relationship to Prevreports model
-    user_reports = db.relationship('Prevreports', back_populates='login_cred',lazy=True)
+    reports = db.relationship('Prevreports', backref='user_email',lazy=True)
 
 
 with app.app_context():
@@ -96,7 +105,7 @@ def contact():
         phone=request.form.get('phone')
         subject=request.form.get('subject')
         msg=request.form.get('message')
-        entry=Contact(Name=name,Email=email,PhoneNo=phone,Subject=subject,Message=msg,Date=datetime.now())
+        entry=Contact(Name=name,Email=email,PhoneNo=phone,Subject=subject,Message=msg,Date=date.today())
         db.session.add(entry)
         db.session.commit()
         return redirect("/")
@@ -107,7 +116,7 @@ def dash():
     if('user' in session):
         user=Login.query.filter_by(Username=session['user']).first()
         if user:
-            data=Prevreports.query.filter_by().all()
+            data=Prevreports.query.filter_by(Email=user.Email).all()
             return render_template("dashboard.html",data=data)
     else:
         return redirect('/login')
@@ -120,11 +129,33 @@ def logout():
 
 @app.route("/dashboard/rpt",methods=["GET","POST"])
 def rept():
-    if request=="POST":
-        name=request.form.get('name')
-        report=request.form.get('reportof')
-        
+    if 'user' in session:
+        user = Login.query.filter_by(Username=session['user']).first()
+        if user:
+            if request.method == "POST":
+                name = request.form.get('name')
+                report = request.form.get('reportof')
+                email = user.Email
+                file = request.files['file']  # Fetch the file from the form
+                
+                if file and allowed_file(file.filename):#filename is the name of the file becoz file as a whole is poori file having bohut sari chheze and all..!!
+                    filename = file.filename
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)  # Save file to the uploads folder
+                    
+                    # Store file path in database
+                    entry = Prevreports(Name=name, Email=email, Report=report, File=filename, Date=date.today())
+                    db.session.add(entry)
+                    db.session.commit()
+                    return redirect("/dashboard/rpt/analyze")
+                else:
+                    return "Invalid file type. Only images and PDFs are allowed."
     return render_template("reportsub.html")
+
+
+@app.route("/dashboard/rpt/analyze")
+def report():
+    return render_template("report.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

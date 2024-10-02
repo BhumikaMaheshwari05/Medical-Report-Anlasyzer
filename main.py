@@ -1,12 +1,7 @@
 from flask import Flask,render_template,redirect,request,session
 from flask_sqlalchemy import SQLAlchemy
-<<<<<<< HEAD
 import os
 from datetime import date
-=======
-
-from datetime import datetime
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
 
 from flask_bcrypt import Bcrypt
 app = Flask(__name__)
@@ -20,7 +15,6 @@ db = SQLAlchemy(app)
 
 bcrypt=Bcrypt(app)
 
-<<<<<<< HEAD
 
 app.config['UPLOAD_FOLDER'] = 'uploads'  # Directory to store uploaded files
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Max file size: 16MB
@@ -40,18 +34,6 @@ class Prevreports(db.Model):
     
     # Relationship to Login model
     
-=======
-class Prevreports(db.Model):
-    __tablename__ = 'prevreports'  # Fix: Table name should be double-underscored.
-    Sno = db.Column(db.Integer, primary_key=True)
-    Email = db.Column(db.String(80), db.ForeignKey('login.Email'))  # Fix: Correct foreign key table name 'login.Email'.
-    Name = db.Column(db.String(80), nullable=False)
-    Report = db.Column(db.String(150), nullable=False)
-    Date = db.Column(db.String(80), nullable=True)
-    
-    # Relationship to Login model
-    login_cred = db.relationship('Login', back_populates='user_reports')
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
 
 
 class Contact(db.Model):
@@ -68,22 +50,13 @@ class Contact(db.Model):
 
 class Login(db.Model):
     __tablename__ = 'login'
-<<<<<<< HEAD
       # Not primary key.
     Username = db.Column(db.String(80), nullable=False,unique=True)
-=======
-    Sno = db.Column(db.Integer)  # Not primary key.
-    Username = db.Column(db.String(80), nullable=False)
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
     Email = db.Column(db.String(80), primary_key=True)  # Fix: This should be primary key, as defined.
     Password = db.Column(db.String(150), nullable=False)
     
     # Relationship to Prevreports model
-<<<<<<< HEAD
     reports = db.relationship('Prevreports', backref='user_email',lazy=True)
-=======
-    user_reports = db.relationship('Prevreports', back_populates='login_cred',lazy=True)
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
 
 
 with app.app_context():
@@ -132,11 +105,7 @@ def contact():
         phone=request.form.get('phone')
         subject=request.form.get('subject')
         msg=request.form.get('message')
-<<<<<<< HEAD
         entry=Contact(Name=name,Email=email,PhoneNo=phone,Subject=subject,Message=msg,Date=date.today())
-=======
-        entry=Contact(Name=name,Email=email,PhoneNo=phone,Subject=subject,Message=msg,Date=datetime.now())
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
         db.session.add(entry)
         db.session.commit()
         return redirect("/")
@@ -147,11 +116,7 @@ def dash():
     if('user' in session):
         user=Login.query.filter_by(Username=session['user']).first()
         if user:
-<<<<<<< HEAD
             data=Prevreports.query.filter_by(Email=user.Email).all()
-=======
-            data=Prevreports.query.filter_by().all()
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
             return render_template("dashboard.html",data=data)
     else:
         return redirect('/login')
@@ -164,7 +129,6 @@ def logout():
 
 @app.route("/dashboard/rpt",methods=["GET","POST"])
 def rept():
-<<<<<<< HEAD
     if 'user' in session:
         user = Login.query.filter_by(Username=session['user']).first()
         if user:
@@ -193,14 +157,6 @@ def rept():
 def report():
     return render_template("report.html")
 
-=======
-    if request=="POST":
-        name=request.form.get('name')
-        report=request.form.get('reportof')
-        
-    return render_template("reportsub.html")
-
->>>>>>> a4162b5599d2e740851d6c89aedbd7568bcf4947
 if __name__ == "__main__":
     app.run(debug=True)
 

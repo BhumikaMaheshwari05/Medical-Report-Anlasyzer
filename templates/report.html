@@ -6,58 +6,14 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>Yha p report dikhegi bhaio!!!!!!!!!</h1>
+
+    {% if text %}
+        <h1>Your report Data Baby!!!..</h1>
+        <pre>{{ text }}</pre>  <!-- Use <pre> tag for preformatted text -->
+    {% else %}
+        <p>No text found in the report.</p>
+    {% endif %}
     
-    <br><br>
-    <h3>Patient Information:</h3>
-    <p><h5>Symptoms:</h5> Cold, Fever</p>
-    <h5>Diagnosis:</h5> Likely Upper Respiratory Infection (URI) or Viral Fever
-    Symptoms Breakdown:
-    Cold (Coryza):
 
-    Common Symptoms:
-    Runny or stuffy nose
-    Sneezing
-    Sore throat
-    Mild cough
-    Congestion
-    General fatigue
-    Cause: Most commonly caused by viral infections, including rhinovirus or adenovirus, cold symptoms indicate irritation of the respiratory tract. The body's immune response to these viruses typically leads to inflammation in the nasal and throat passages.
-    Fever:
-
-    Body Temperature: Elevated, usually between 100°F and 104°F (37.8°C - 40°C)
-    Cause: Fever is the body's natural response to fighting off an infection. When a virus, such as one causing a cold or flu, enters the body, the immune system increases the body's temperature to create an environment less favorable for viral replication.
-    Potential Diagnosis:
-    Viral Fever (Influenza-like illness):
-
-    A common cause of cold and fever, usually self-limiting and mild.
-    Symptoms may last from a few days to a week.
-    Viral infections can often trigger both cold symptoms and fever as the body mounts an immune response.
-    Upper Respiratory Tract Infection (URTI):
-
-    Another potential cause where cold symptoms dominate along with low to moderate fever. This infection affects the nose, throat, and sinuses.
-    Could be caused by common cold viruses or other pathogens such as the flu virus, adenovirus, or parainfluenza.
-    Recommended Treatment:
-    Rest and Hydration:
-
-    Rest is crucial for allowing the immune system to fight off the infection.
-    Staying hydrated with fluids like water and herbal teas helps thin mucus and reduce congestion.
-    Fever Management:
-
-    Over-the-counter antipyretics (fever-reducing medications) such as acetaminophen or ibuprofen can help lower fever and alleviate associated discomfort like headaches or muscle aches.
-    Nasal Congestion Relief:
-
-    Saline nasal sprays or steam inhalation can help relieve nasal congestion.
-    Decongestants may be recommended if symptoms persist, but only for short-term use to avoid rebound congestion.
-    Cough and Sore Throat Remedies:
-
-    Warm salt water gargles, throat lozenges, and honey can soothe sore throats.
-    Cough suppressants or expectorants can be used depending on whether the cough is dry or productive.
-    Red Flags:
-    Worsening Symptoms: If the fever persists beyond 3-5 days or worsens, it could indicate a secondary bacterial infection like sinusitis or bronchitis.
-    Shortness of Breath: If the patient experiences difficulty breathing, chest pain, or rapid breathing, it could be a sign of pneumonia, requiring immediate medical attention.
-    High Fever: Fever above 104°F (40°C), or prolonged fever despite treatment, should be evaluated to rule out more severe infections like influenza, COVID-19, or bacterial pneumonia.
-    Conclusion:
-    The patient's presentation of cold and fever is consistent with a common viral illness, most likely a mild viral fever or upper respiratory tract infection. Standard home care measures such as rest, hydration, and over-the-counter medications should be sufficient. However, the patient should monitor symptoms for any signs of complication and seek medical attention if symptoms persist or worsen.
 </body>
 </html>

@@ -1,9 +1,26 @@
-from flask import Flask,render_template,redirect,request,session
+from flask import Flask,render_template,redirect,request,session,send_from_directory, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import date
 
 from flask_bcrypt import Bcrypt
+
+from PyPDF2 import PdfReader
+import re
+
+import os
+import google.generativeai as genai
+
+
+api_key = os.getenv('GOOGLE_API_KEY')
+if not api_key:
+    raise ValueError("API key is not set. Please set the 'GOOGLE_API_KEY' environment variable.")
+
+genai.configure(api_key=api_key)
+
+
+
+
 app = Flask(__name__)
 
 app.secret_key = 'super-secret-key'
@@ -57,6 +74,25 @@ class Login(db.Model):
     
     # Relationship to Prevreports model
     reports = db.relationship('Prevreports', backref='user_email',lazy=True)
+
+
+def extract_text_from_pdf(file_path):
+    reader = PdfReader(file_path)
+    text = ""
+    print(f"Reading PDF file: {file_path}")
+
+    for page_num in range(0,1):
+        page = reader.pages[page_num]
+        page_text = page.extract_text()
+        #print(f"Page {page_num + 1} text: {page_text}")  # Debug output for each page
+
+        if page_text:  # Only add text if it exists
+            text += page_text + "\n\n"
+    
+    return text.strip()  # Strip any leading or trailing whitespace
+
+
+
 
 
 with app.app_context():
@@ -119,7 +155,7 @@ def dash():
             data=Prevreports.query.filter_by(Email=user.Email).all()
             return render_template("dashboard.html",data=data)
     else:
-        return redirect('/login')
+        return render_template('dashboard.html')
     #return render_template("indexdsh.html",data=data)
     
 @app.route("/logout")
@@ -147,16 +183,53 @@ def rept():
                     entry = Prevreports(Name=name, Email=email, Report=report, File=filename, Date=date.today())
                     db.session.add(entry)
                     db.session.commit()
-                    return redirect("/dashboard/rpt/analyze")
+                    return redirect(f"/dashboard/rpt/analyze?filename={filename}")
                 else:
                     return "Invalid file type. Only images and PDFs are allowed."
     return render_template("reportsub.html")
 
 
+
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 64,
+  "max_output_tokens": 8192,
+  "response_mime_type": "text/plain",
+}
+
+model = genai.GenerativeModel(
+  model_name="gemini-1.5-flash",
+  generation_config=generation_config,
+  # safety_settings = Adjust safety settings
+  # See https://ai.google.dev/gemini-api/docs/safety-settings
+)
+chat_session = model.start_chat(
+  history=[
+  ]
+)
+
+
 @app.route("/dashboard/rpt/analyze")
 def report():
-    return render_template("report.html")
+    if 'user' in session:
+        user = Login.query.filter_by(Username=session['user']).first()
+        if user:
+            filename = request.args.get('filename')  # Get the filename from the query parameter
+            if filename:
+                # Serve the file directly
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                prmpt=extract_text_from_pdf(file_path)
+                texts = chat_session.send_message(prmpt)
+                #texts=format_report_text(texts)
+                #print(f"Extracted Text: {texts}")
+                return render_template('report.html',text=texts.text)
+  # Pass filename to the templatec
+    return render_template("report.html", error="No report found or you are not logged in.")
+    #return render_template("report.html")
 
+
+#send_from_directory
 if __name__ == "__main__":
     app.run(debug=True)
 

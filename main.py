@@ -81,7 +81,7 @@ def extract_text_from_pdf(file_path):
     text = ""
     print(f"Reading PDF file: {file_path}")
 
-    for page_num in range(0,1):
+    for page_num in range(0,5):
         page = reader.pages[page_num]
         page_text = page.extract_text()
         #print(f"Page {page_num + 1} text: {page_text}")  # Debug output for each page
@@ -184,8 +184,22 @@ def rept():
                     db.session.add(entry)
                     db.session.commit()
                     return redirect(f"/dashboard/rpt/analyze?filename={filename}")
-                else:
-                    return "Invalid file type. Only images and PDFs are allowed."
+                
+    else:
+        if request.method == "POST":
+                
+                file = request.files['file']  # Fetch the file from the form
+                
+                if file and allowed_file(file.filename):#filename is the name of the file becoz file as a whole is poori file having bohut sari chheze and all..!!
+                    filename = file.filename
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)  # Save file to the uploads folder
+                    
+                    # Store file path in database
+                    
+                    return redirect(f"/dashboard/rpt/analyze?filename={filename}")
+                
+    
     return render_template("reportsub.html")
 
 
@@ -212,21 +226,19 @@ chat_session = model.start_chat(
 
 @app.route("/dashboard/rpt/analyze")
 def report():
-    if 'user' in session:
-        user = Login.query.filter_by(Username=session['user']).first()
-        if user:
-            filename = request.args.get('filename')  # Get the filename from the query parameter
-            if filename:
-                # Serve the file directly
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                prmpt=extract_text_from_pdf(file_path)
-                texts = chat_session.send_message(prmpt)
-                #texts=format_report_text(texts)
-                #print(f"Extracted Text: {texts}")
-                return render_template('report.html',text=texts.text)
-  # Pass filename to the templatec
+    
+    filename = request.args.get('filename')  # Get the filename from the query parameter
+    if filename:
+        # Serve the file directly
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        prmpt=extract_text_from_pdf(file_path)
+        texts = chat_session.send_message(prmpt+"Give full information and at the end summarize whole report")
+        #texts=format_report_text(texts)
+        #print(f"Extracted Text: {texts}")
+        return render_template('report.html',text=texts.text)
+    # Pass filename to the templatec
     return render_template("report.html", error="No report found or you are not logged in.")
-    #return render_template("report.html")
+        #return render_template("report.html")
 
 
 #send_from_directory

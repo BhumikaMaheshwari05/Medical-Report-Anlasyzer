@@ -4,16 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        pre {
+            background: linear-gradient(135deg, #f0f4f8 30%, #d1e8ff 100%);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.3em;
+            color: #333;
+            white-space: pre-wrap;
+            text-align: left;
+            line-height: 1.6;
+            
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.05);
+            
+            overflow-x: auto;
+            word-wrap: break-word;
+            border: 1px solid #0072ff;
+        }
+    </style>
 </head>
 <body>
-
+    <h1>Your report Data Baby!!!..</h1>
+    <div>
     {% if text %}
-        <h1>Your report Data Baby!!!..</h1>
-        <pre>{{ text }}</pre>  <!-- Use <pre> tag for preformatted text -->
+        <pre>{{ text }}</pre>  
     {% else %}
         <p>No text found in the report.</p>
     {% endif %}
-    
+</div>
 
 </body>
 </html>

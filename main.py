@@ -152,8 +152,9 @@ def dash():
     if('user' in session):
         user=Login.query.filter_by(Username=session['user']).first()
         if user:
+            x=Prevreports.query.filter_by(Email=user.Email).first()
             data=Prevreports.query.filter_by(Email=user.Email).all()
-            return render_template("dashboard.html",data=data)
+            return render_template("dashboard.html",data=data,name=x)
     else:
         return render_template('dashboard.html')
     #return render_template("indexdsh.html",data=data)
@@ -241,7 +242,15 @@ def report():
         #return render_template("report.html")
 
 
-#send_from_directory
+
+
+
+@app.route("/dashboard/yourpdf<string:filename>")
+def yrrpt(filename):
+
+    return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
 

@@ -1,4 +1,4 @@
-from flask import Flask,render_template,redirect,request,session,send_from_directory, abort
+from flask import Flask,render_template,redirect,request,session,send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import date
@@ -6,7 +6,6 @@ from datetime import date
 from flask_bcrypt import Bcrypt
 
 from PyPDF2 import PdfReader
-import re
 
 import os
 import google.generativeai as genai
@@ -79,14 +78,14 @@ class Login(db.Model):
 def extract_text_from_pdf(file_path):
     reader = PdfReader(file_path)
     text = ""
-    print(f"Reading PDF file: {file_path}")
+    
 
-    for page_num in range(0,5):
+    for page_num in range(0,1):
         page = reader.pages[page_num]
         page_text = page.extract_text()
-        #print(f"Page {page_num + 1} text: {page_text}")  # Debug output for each page
+        
 
-        if page_text:  # Only add text if it exists
+        if page_text:  
             text += page_text + "\n\n"
     
     return text.strip()  # Strip any leading or trailing whitespace
@@ -154,9 +153,9 @@ def dash():
         if user:
             x=Prevreports.query.filter_by(Email=user.Email).first()
             data=Prevreports.query.filter_by(Email=user.Email).all()
-            return render_template("dashboard.html",data=data,name=x)
+            return render_template("dashboard.html",data=data,x=x)
     else:
-        return render_template('dashboard.html')
+        return render_template('dashboard.html',x='user')
     #return render_template("indexdsh.html",data=data)
     
 @app.route("/logout")
@@ -173,14 +172,12 @@ def rept():
                 name = request.form.get('name')
                 report = request.form.get('reportof')
                 email = user.Email
-                file = request.files['file']  # Fetch the file from the form
-                
-                if file and allowed_file(file.filename):#filename is the name of the file becoz file as a whole is poori file having bohut sari chheze and all..!!
+                file = request.files['file']  
+                if file and allowed_file(file.filename):
                     filename = file.filename
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)  # Save file to the uploads folder
+                    file.save(file_path)  
                     
-                    # Store file path in database
                     entry = Prevreports(Name=name, Email=email, Report=report, File=filename, Date=date.today())
                     db.session.add(entry)
                     db.session.commit()
@@ -189,14 +186,13 @@ def rept():
     else:
         if request.method == "POST":
                 
-                file = request.files['file']  # Fetch the file from the form
+                file = request.files['file']  
                 
-                if file and allowed_file(file.filename):#filename is the name of the file becoz file as a whole is poori file having bohut sari chheze and all..!!
+                if file and allowed_file(file.filename):
                     filename = file.filename
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    file.save(file_path)  # Save file to the uploads folder
-                    
-                    # Store file path in database
+                    file.save(file_path)   
+        
                     
                     return redirect(f"/dashboard/rpt/analyze?filename={filename}")
                 
@@ -233,7 +229,7 @@ def report():
         # Serve the file directly
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         prmpt=extract_text_from_pdf(file_path)
-        texts = chat_session.send_message(prmpt+"Give full information and at the end summarize whole report")
+        texts = chat_session.send_message(prmpt+"Give full information about the test and the teminologies used and also tellwhat should be the condition for the normal person for the same test and at the end summarize whole report")
         #texts=format_report_text(texts)
         #print(f"Extracted Text: {texts}")
         return render_template('report.html',text=texts.text)

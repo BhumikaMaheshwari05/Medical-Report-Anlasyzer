@@ -22,10 +22,10 @@ genai.configure(api_key=api_key)
 
 app = Flask(__name__)
 
-app.secret_key = 'super-secret-key'
+app.secret_key = os.getenv('SECRET_KEY', 'fallback-key-for-dev')
 
 
-app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///MedRep.db"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///MedRep.db').replace("postgres://", "postgresql://", 1)
 
 db = SQLAlchemy(app) 
 
@@ -248,6 +248,6 @@ def yrrpt(filename):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    port = int(os.environ.get("PORT", 5000))  # Render provides PORT
+    app.run(host='0.0.0.0', port=port)
 

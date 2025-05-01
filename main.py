@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # Configuration
 app.secret_key = os.getenv('SECRET_KEY', 'fallback-secret-key')  # Set in Render
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///MedRep.db').replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')  # Render handles the rest
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max upload
 
